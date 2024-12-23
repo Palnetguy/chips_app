@@ -1,0 +1,44 @@
+{
+    "choco": [
+      {
+        "title": "Choco Bar",
+        "type": "choco",
+        "price": 2.5,
+        "backgroundColor": "#FF5733",
+        "image": "assets/images/choco_bar.png"
+      },
+      {
+        "title": "Choco Milk",
+        "type": "choco",
+        "price": 3.0,
+        "backgroundColor": "#C70039",
+        "image": "assets/images/choco_milk.png"
+      }
+    ],
+    "chipos": [
+      {
+        "title": "Chipos Salted",
+        "type": "chipos",
+        "price": 1.0,
+        "backgroundColor": "#FFC300",
+        "image": "assets/images/chipos_salted.png"
+      },
+      {
+        "title": "Chipos Spicy",
+        "type": "chipos",
+        "price": 1.2,
+        "backgroundColor": "#DAF7A6",
+        "image": "assets/images/chipos_spicy.png"
+      }
+    ],
+    "Candy": [
+      {
+        "title": "Candy Lollipop",
+        "type": "Candy",
+        "price": 0.5,
+        "backgroundColor": "#FF69B4",
+        "image": "assets/images/candy_lollipop.png"
+      }
+    ]
+  }
+  
