@@ -2,6 +2,7 @@
 // Home screen of the application
 import 'dart:ui';
 
+import 'package:chips_app/contollers/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,10 +13,13 @@ import 'package:chips_app/widgets/bottom_cart_preview.dart';
 
 import '../../constants/appconstants.dart';
 import '../../widgets/build_header.dart';
+import '../item detail view/item_detail_view.dart';
 
+final _pageViewKey = GlobalKey<_PageTransformerPageViewState>();
 final CollectionsController collectorsController =
     Get.put(CollectionsController());
 final HomeScreenController homeController = Get.put(HomeScreenController());
+final CartController cartController = Get.put(CartController());
 
 class CartCollections extends StatefulWidget {
   const CartCollections({super.key});
@@ -128,51 +132,58 @@ class _CartCollectionsState extends State<CartCollections> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppHeader(
-              icon: Icons.menu,
-              textSpan: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Order From The\nBest Of ',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w400,
-                      color: AppConstants.kTextColorPrimary,
-                    ),
+        child: GetBuilder<CollectionsController>(
+          init: CollectionsController(),
+          initState: (_) {},
+          builder: (_) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppHeader(
+                  icon: Icons.menu,
+                  textSpan: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Order From The\nBest Of ',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w400,
+                          color: AppConstants.kTextColorPrimary,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Snacks',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          color: AppConstants.kTextColorPrimary,
+                        ),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: 'Snacks',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: AppConstants.kTextColorPrimary,
-                    ),
+                ),
+                // Header section
+                _buildCategories(), // Category selection
+                _buildCollectionHeader(),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _ChipsList(
+                        pageController: _pageController,
+                        products: products,
+                        currentPage:
+                            collectorsController.currentItemIntex.toInt(),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: const BottomCartPreview(),
+                      )
+                    ],
                   ),
-                ],
-              ),
-            ),
-            // Header section
-            _buildCategories(), // Category selection
-            _buildCollectionHeader(),
-            Expanded(
-              child: Stack(
-                children: [
-                  _ChipsList(
-                    pageController: _pageController,
-                    products: products,
-                    currentPage: _currentPage,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: const BottomCartPreview(),
-                  )
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -254,6 +265,8 @@ class _CartCollectionsState extends State<CartCollections> {
             // collectorsController.updateSnacks(_categories[_selectedIndex]);
             print('jshsgs');
             print(_categories);
+            _pageViewKey.currentState?.resetPage();
+            // print("Reset the page programmatically")
             collectorsController.categoryChanged();
           });
         },
@@ -336,16 +349,35 @@ class _ChipsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageTransformerPageView(
-      pageController: _pageController,
-      itemCount: products.length,
-      transformer: _DiagonalFlyTransformer(),
-      itemBuilder: (context, index) {
-        return _ProductCard(
-          product: products[index],
-          isActive: _currentPage == index,
-        );
-      },
+    // Create a GlobalKey for the PageTransformerPageView
+    // final _pageViewKey = GlobalKey<_PageTransformerPageViewState>();
+
+    return Column(
+      children: [
+        // PageTransformerPageView
+        Expanded(
+          child: PageTransformerPageView(
+            key: _pageViewKey, // Assign the key
+            pageController: _pageController,
+            itemCount: products.length,
+            transformer: _DiagonalFlyTransformer(),
+            itemBuilder: (context, index) {
+              return _ProductCard(
+                product: products[index],
+                isActive: collectorsController.currentItemIntex == index,
+              );
+            },
+          ),
+        ),
+        // Reset Button
+        // ElevatedButton(
+        //   onPressed: () {
+        //     // Call the resetPage function using the GlobalKey
+        //     _pageViewKey.currentState?.resetPage();
+        //   },
+        //   child: const Text('Reset'),
+        // ),
+      ],
     );
   }
 }
@@ -361,173 +393,190 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // color: product.backgroundColor,
-      height: 100, // Increased overall height
-      margin: EdgeInsets.only(
-        left: 35,
-        right: 35,
-        top: isActive ? 20 : 40,
-        bottom: isActive ? 20 : 0,
-      ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          // Main Card
-          ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: Container(
-              height: 370, // Increased card height
-              decoration: BoxDecoration(
-                color: product.backgroundColor,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Stack(
-                children: [
-                  // Product Image with Transform
-                  Positioned(
-                    right: -40,
-                    top: 60,
-                    child: Transform.translate(
-                      offset: const Offset(.5, -1),
-                      child: Transform.rotate(
-                        angle: 0.48,
-                        child: Container(
-                          // width: 280, // Increased image width
-                          height: 350, // Increased image height
-                          decoration: const BoxDecoration(
-                              // borderRadius: BorderRadius.circular(10),
-                              ),
-                          child: Image.asset(
-                            product.imagePath,
-                            fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () {
+        Get.to(
+          () => ItemDetailView(
+            name: product.title,
+            subtitle: product.subtitle,
+            type: product.type,
+            imageUrl: product.imagePath,
+            price: product.price,
+            id: product.id,
+            backgroundColor: product.colorString,
+          ),
+        );
+      },
+      child: Container(
+        // color: product.backgroundColor,
+        height: 100, // Increased overall height
+        margin: EdgeInsets.only(
+          left: 35,
+          right: 35,
+          top: isActive ? 20 : 40,
+          bottom: isActive ? 20 : 0,
+        ),
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // Main Card
+            ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: Container(
+                height: 370, // Increased card height
+                decoration: BoxDecoration(
+                  color: product.backgroundColor,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Stack(
+                  children: [
+                    // Product Image with Transform
+                    Positioned(
+                      right: -40,
+                      top: 60,
+                      child: Transform.translate(
+                        offset: const Offset(.5, -1),
+                        child: Transform.rotate(
+                          angle: 0.48,
+                          child: Container(
+                            // width: 280, // Increased image width
+                            height: 350, // Increased image height
+                            decoration: const BoxDecoration(
+                                // borderRadius: BorderRadius.circular(10),
+                                ),
+                            child: Image.asset(
+                              product.imagePath,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(24), // Increased padding
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title with constraints
-                        Container(
-                          constraints: const BoxConstraints(
-                            maxWidth: 170, // Increased max width
-                          ),
-                          child: Text(
-                            product.title,
-                            style: const TextStyle(
-                                fontSize: 36, // Increased font size
-                                fontWeight: FontWeight.bold,
-                                height: 1),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 12), // Increased spacing
-
-                        // Category Pill
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Text(
-                            product.type,
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(.5),
-                              fontSize: 14, // Increased font size
+                    Padding(
+                      padding: const EdgeInsets.all(24), // Increased padding
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title with constraints
+                          Container(
+                            constraints: const BoxConstraints(
+                              maxWidth: 170, // Increased max width
+                            ),
+                            child: Text(
+                              product.title,
+                              style: const TextStyle(
+                                  fontSize: 36, // Increased font size
+                                  fontWeight: FontWeight.bold,
+                                  height: 1),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 12), // Increased spacing
 
-                        const Spacer(),
-
-                        // Price and Cart Button with glass effect
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: BackdropFilter(
-                            filter:
-                                ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 2,
+                          // Category Pill
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Text(
+                              product.type,
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(.5),
+                                fontSize: 14, // Increased font size
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(28),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          // Price and Cart Button with glass effect
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(28),
+                            child: BackdropFilter(
+                              filter:
+                                  ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 2,
+                                  vertical: 2,
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Price
-                                  Row(
-                                    children: [
-                                      const SizedBox(width: 17),
-                                      Text(
-                                        '\$${product.price.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontSize: 20, // Increased font size
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                    ],
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
                                   ),
-                                  // Cart button
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Add to cart logic here
-                                      cartController.addToCart(
-                                        id: product.id,
-                                        title: product.title,
-                                        subtitle: product.subtitle,
-                                        type: product.type,
-                                        price: product.price,
-                                        backgroundColor: product.colorString,
-                                        image: product.imagePath,
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(
-                                          10), // Increased padding
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.8),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.2),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Price
+                                    Row(
+                                      children: [
+                                        const SizedBox(width: 17),
+                                        Text(
+                                          '\$${product.price.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            fontSize: 20, // Increased font size
+                                            fontWeight: FontWeight.w900,
+                                          ),
                                         ),
-                                      ),
-                                      child: const Icon(
-                                        Icons.shopping_cart,
-                                        color: Colors.white,
-                                        size: 30, // Increased icon size
+                                      ],
+                                    ),
+                                    // Cart button
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Add to cart logic here
+                                        cartController.addToCart(
+                                          subtitle: product.subtitle,
+                                          type: product.type,
+                                          price: product.price,
+                                          id: product.id,
+                                          backgroundColor: product.colorString,
+                                          title: product.title,
+                                          image: product.imagePath,
+                                          // name: product.title,
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(
+                                            10), // Increased padding
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.8),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color:
+                                                Colors.white.withOpacity(0.2),
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.shopping_cart,
+                                          color: Colors.white,
+                                          size: 30, // Increased icon size
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -592,70 +641,73 @@ abstract class PageTransformer {
   Widget transform(Widget child, TransformInfo info);
 }
 
-class PageTransformerPageView extends StatefulWidget {
-  final PageController pageController;
-  final PageTransformer transformer;
-  final int itemCount;
-  final PageTransformerBuilder itemBuilder;
-  final double? currentPage;
+// class PageTransformerPageView extends StatefulWidget {
+//   final PageController pageController;
+//   final PageTransformer transformer;
+//   final int itemCount;
+//   final PageTransformerBuilder itemBuilder;
+//   final double? currentPage;
 
-  const PageTransformerPageView({
-    super.key,
-    required this.pageController,
-    required this.transformer,
-    required this.itemCount,
-    required this.itemBuilder,
-    this.currentPage,
-  });
+//   const PageTransformerPageView({
+//     super.key,
+//     required this.pageController,
+//     required this.transformer,
+//     required this.itemCount,
+//     required this.itemBuilder,
+//     this.currentPage,
+//   });
 
-  @override
-  State<PageTransformerPageView> createState() =>
-      _PageTransformerPageViewState();
-}
+//   @override
+//   State<PageTransformerPageView> createState() =>
+//       _PageTransformerPageViewState();
+// }
 
-class _PageTransformerPageViewState extends State<PageTransformerPageView> {
-  double? _currentPage = 0;
+// class _PageTransformerPageViewState extends State<PageTransformerPageView> {
+//   double? _currentPage = collectorsController.currentItemIntex;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentPage = widget.pageController.initialPage.toDouble();
-    widget.pageController.addListener(_onPageChanged);
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _currentPage = widget.pageController.initialPage.toDouble();
+//     print('-init $_currentPage');
+//     widget.pageController.addListener(_onPageChanged);
+//   }
 
-  @override
-  void dispose() {
-    widget.pageController.removeListener(_onPageChanged);
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     widget.pageController.removeListener(_onPageChanged);
+//     super.dispose();
+//   }
 
-  void _onPageChanged() {
-    setState(() {
-      _currentPage = widget.pageController.page;
-      print(_currentPage); // print curent ndex
-    });
-  }
+//   void _onPageChanged() {
+//     setState(() {
+//       _currentPage = collectorsController.currentItemIntex;
+//       collectorsController
+//           .updatecurrentCategory(widget.pageController.page ?? 0);
+//       print('$_currentPage in view'); // print curent ndex
+//     });
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PageView.builder(
-      controller: widget.pageController,
-      itemCount: widget.itemCount,
-      itemBuilder: (context, index) {
-        final position = (_currentPage ?? 0) - index;
-        final info = TransformInfo(
-          position: position,
-          context: context,
-          index: index,
-        );
-        return widget.transformer.transform(
-          widget.itemBuilder(context, index),
-          info,
-        );
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return PageView.builder(
+//       controller: widget.pageController,
+//       itemCount: widget.itemCount,
+//       itemBuilder: (context, index) {
+//         final position = (collectorsController.currentItemIntex ?? 0) - index;
+//         final info = TransformInfo(
+//           position: position,
+//           context: context,
+//           index: index,
+//         );
+//         return widget.transformer.transform(
+//           widget.itemBuilder(context, index),
+//           info,
+//         );
+//       },
+//     );
+//   }
+// }
 
 class _DiagonalFlyTransformer extends PageTransformer {
   @override
@@ -690,3 +742,81 @@ class _DiagonalFlyTransformer extends PageTransformer {
 }
 
 // Data Classes
+
+class PageTransformerPageView extends StatefulWidget {
+  final PageController pageController;
+  final PageTransformer transformer;
+  final int itemCount;
+  final PageTransformerBuilder itemBuilder;
+  final double? currentPage;
+
+  const PageTransformerPageView({
+    super.key,
+    required this.pageController,
+    required this.transformer,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.currentPage,
+  });
+
+  @override
+  State<PageTransformerPageView> createState() =>
+      _PageTransformerPageViewState();
+}
+
+class _PageTransformerPageViewState extends State<PageTransformerPageView> {
+  double? _currentPage = collectorsController.currentItemIntex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.pageController.initialPage.toDouble();
+    print('-init $_currentPage');
+    widget.pageController.addListener(_onPageChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.pageController.removeListener(_onPageChanged);
+    super.dispose();
+  }
+
+  void _onPageChanged() {
+    setState(() {
+      _currentPage = collectorsController.currentItemIntex;
+      collectorsController
+          .updatecurrentCategory(widget.pageController.page ?? 0);
+      print('$_currentPage in view'); // Print current index
+    });
+  }
+
+  /// Function to reset the current page to 0
+  void resetPage() {
+    setState(() {
+      widget.pageController.jumpToPage(0); // Reset the PageController to page 0
+      _currentPage = 0;
+      collectorsController
+          .updatecurrentCategory(0); // Update the current category
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: widget.pageController,
+      itemCount: widget.itemCount,
+      itemBuilder: (context, index) {
+        final position = (collectorsController.currentItemIntex ?? 0) - index;
+        final info = TransformInfo(
+          position: position,
+          context: context,
+          index: index,
+        );
+        return widget.transformer.transform(
+          widget.itemBuilder(context, index),
+          info,
+        );
+      },
+    );
+  }
+}

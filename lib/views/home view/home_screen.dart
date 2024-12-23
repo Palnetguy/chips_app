@@ -1,7 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
 import 'dart:ui';
-
+// import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +19,7 @@ final CartController cartController = Get.put(CartController());
 final HomeScreenController homeController = Get.put(HomeScreenController());
 final CollectionsController collectorsController =
     Get.put(CollectionsController());
+final List<String> _items = List.generate(20, (index) => 'Item $index');
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -38,7 +40,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               // appbar
               AppHeader(
-                icon: Icons.menu,
+                icon: Icons.arrow_back_ios_new_rounded,
                 textSpan: TextSpan(
                   children: [
                     TextSpan(
@@ -103,6 +105,7 @@ class ProductCard extends StatelessWidget {
   final String colorString;
   final String subtitle;
   final String imagePath;
+  final VoidCallback onClick;
 
   const ProductCard({
     super.key,
@@ -114,11 +117,13 @@ class ProductCard extends StatelessWidget {
     required this.colorString,
     required this.subtitle,
     required this.imagePath,
+    required this.onClick,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       height: 200,
       width: MediaQuery.of(context).size.width / 2,
       margin: const EdgeInsets.all(8),
@@ -246,7 +251,8 @@ class ProductCard extends StatelessWidget {
                                 backgroundColor: colorString,
                                 image: imagePath,
                               );
-                              homeController.removeSnackById(type, id);
+                              onClick;
+                              // homeController.removeSnackById(type, id);
                             },
                             child: Container(
                               padding: const EdgeInsets.all(8),
@@ -274,6 +280,87 @@ class ProductCard extends StatelessWidget {
           ),
           // Tilted Image
         ],
+      ),
+    );
+  }
+}
+
+class AnimatedListWithDelete extends StatefulWidget {
+  final List<String> items;
+  final Function(String) onDelete;
+
+  const AnimatedListWithDelete(
+      {Key? key, required this.items, required this.onDelete})
+      : super(key: key);
+
+  @override
+  _AnimatedListWithDeleteState createState() => _AnimatedListWithDeleteState();
+}
+
+class _AnimatedListWithDeleteState extends State<AnimatedListWithDelete> {
+  late List<String> _items;
+
+  @override
+  void initState() {
+    super.initState();
+    _items = widget.items;
+  }
+
+  void _deleteItem(int index) {
+    final removedItem = _items[index];
+    setState(() {
+      _items.removeAt(index);
+    });
+
+    // Call the onDelete callback to perform additional operations if needed
+    widget.onDelete(removedItem);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: _items.length,
+      itemBuilder: (context, index) {
+        return AnimatedListItem(
+          item: _items[index],
+          onDelete: () => _deleteItem(index),
+        );
+      },
+    );
+  }
+}
+
+class AnimatedListItem extends StatefulWidget {
+  final String item;
+  final VoidCallback onDelete;
+
+  const AnimatedListItem({Key? key, required this.item, required this.onDelete})
+      : super(key: key);
+
+  @override
+  _AnimatedListItemState createState() => _AnimatedListItemState();
+}
+
+class _AnimatedListItemState extends State<AnimatedListItem> {
+  bool _isDeleted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _isDeleted ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 300),
+      child: ListTile(
+        title: Text(widget.item),
+        trailing: IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () {
+            setState(() {
+              _isDeleted = true;
+            });
+            // Call the delete operation after the animation
+            Future.delayed(const Duration(milliseconds: 300), widget.onDelete);
+          },
+        ),
       ),
     );
   }
@@ -331,11 +418,18 @@ class _BuildProductGrid extends StatelessWidget {
                   price: e.price,
                   color: AppConstants.hexToColor(e.backgroundColor),
                   imagePath: e.image,
+                  onClick: () {},
                 );
               }),
             ],
           ),
-        ),
+        ).animate().slideY(
+              curve: Curves.easeInOut,
+              delay: 530.ms,
+              duration: 500.ms,
+              begin: 1, // Start from bottom (out of the screen)
+              end: 0, // End at the normal position (in the screen)
+            ),
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(8),
@@ -389,7 +483,14 @@ class _BuildProductGrid extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                ).animate().slideX(
+                      curve: Curves.easeInOut,
+                      // delay: 530.ms,
+                      duration: 500.ms,
+                      begin: 1,
+                      end: 0,
+                      // End at the normal position (in the screen)
+                    ),
                 Expanded(
                   child: ListView(
                     shrinkWrap: true,
@@ -408,11 +509,18 @@ class _BuildProductGrid extends StatelessWidget {
                           price: e.price,
                           color: AppConstants.hexToColor(e.backgroundColor),
                           imagePath: e.image,
+                          onClick: () {},
                         );
                       }).toList(),
                     ],
                   ),
-                ),
+                ).animate().slideY(
+                      curve: Curves.easeInOut,
+                      delay: 530.ms + 500.ms,
+                      duration: 500.ms,
+                      begin: 1, // Start from bottom (out of the screen)
+                      end: 0, // End at the normal position (in the screen)
+                    ),
               ],
             ),
           ),

@@ -8,11 +8,22 @@ class CollectionsController extends GetxController {
   Map<String, List<Snack>> snacksDataEach = AppConstants.snacksData;
 
   String _currentCategory = 'choco';
+  double _currentItemIntex = 0;
   // Map<String, List<Snack>> snacksDataEach = AppConstants.snacksData;
 
   // Get function to fetch the snacks data
   dynamic get snacks => snacksData;
+  dynamic get currentItemIntex => _currentItemIntex;
   String get currentCategory => _currentCategory;
+
+  void updatecurrentCategory(
+    double index,
+  ) {
+    _currentItemIntex = index;
+    print('Has been reset back to : --- : ->>$_currentItemIntex');
+
+    update();
+  }
 
   // Function to update the list of snacks for a specific category
   void updateSnacks(String category) {
@@ -33,16 +44,4 @@ class CollectionsController extends GetxController {
 
     update();
   }
-
-  // // Function to add a snack to a specific category
-  // void addSnackToCategory(String category, Snack snack) {
-  //   if (snacksData.containsKey(category)) {
-  //     // If category exists, add the snack to the existing list
-  //     snacksData[category]!.add(snack);
-  //   } else {
-  //     // If category doesn't exist, create a new entry with the snack
-  //     snacksData[category] = [snack];
-  //   }
-  //   update(); // This triggers an update in the UI when using GetX
-  // }
 }

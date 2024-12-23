@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/get_core.dart';
 
@@ -57,7 +58,20 @@ class CartListView extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
+                )
+                    .animate()
+                    .slide(
+                      begin: Offset(0, -.3), // Start from below (y = 1)
+                      end: Offset(0, 0), // End at normal position (y = 0)
+                      curve: Curves.easeInOut,
+                      duration: 600.ms,
+                    )
+                    .scaleX(
+                      begin: 1.1, // Start slightly larger
+                      end: 1.0, // End at normal size
+                      curve: Curves.easeOut, // Smooth easing
+                      duration: 600.ms, // Animation duration
+                    ),
                 // LIST
                 Expanded(
                   child: Stack(
@@ -88,13 +102,30 @@ class CartListView extends StatelessWidget {
                                 shrinkWrap: true,
                                 children:
                                     cartController.cartData.map<Widget>((e) {
-                                  return _ProductModuleCart(
-                                    image: e.image,
-                                    title: e.title,
-                                    subtitle: e.subtitle,
-                                    price: e.price.toString(),
+                                  final index = cartController.cartData
+                                      .indexOf(e); // Get the index for delay
+                                  return Animate(
+                                    effects: [
+                                      SlideEffect(
+                                        begin: Offset(
+                                            1.5, 0.0), // Start from the right
+                                        end: Offset(
+                                            0.0, 0.0), // End at normal position
+                                        // curve: Curves.easeOut,
+                                        duration: Duration(milliseconds: 300),
+                                      ),
+                                    ],
+                                    delay: Duration(
+                                        milliseconds: index *
+                                            300), // Delay by index for staggered effect
+                                    child: _ProductModuleCart(
+                                      image: e.image,
+                                      title: e.title,
+                                      subtitle: e.subtitle,
+                                      price: e.price.toString(),
+                                    ),
                                   );
-                                }).toList(), // Convert the Iterable to a List
+                                }).toList(),
                               ),
                             ),
 
@@ -110,7 +141,16 @@ class CartListView extends StatelessWidget {
                               images: cartController.cartData
                                   .map((item) => item.image as String)
                                   .toList(),
-                            ),
+                            ).animate().slide(
+                                  delay: cartController.cartData.length > 4
+                                      ? 300.ms * 4
+                                      : 300.ms * cartController.cartData.length,
+                                  begin:
+                                      Offset(-1.5, 0.0), // Start from the right
+                                  end: Offset(0.0, 0.0),
+                                  curve: Curves.easeOut, // Smooth easing
+                                  duration: 600.ms, // Animation duration
+                                ),
                             const Spacer(),
                             // make payment
                             Container(
@@ -153,7 +193,17 @@ class CartListView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            ),
+                            ).animate().slideY(
+                                  delay: (cartController.cartData.length > 4
+                                          ? 300.ms * 4
+                                          : 300.ms *
+                                              cartController.cartData.length) +
+                                      600.ms,
+                                  begin: 1, // Start from the right
+                                  end: 0,
+                                  curve: Curves.easeOut, // Smooth easing
+                                  duration: 600.ms, // Animation duration
+                                ),
                           ],
                         ),
                       ),
@@ -340,7 +390,7 @@ class _DeliveryAmount extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'USD ${total + deliveryAmount}',
+                          'USD ${(total + deliveryAmount).toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w700,

@@ -1,5 +1,7 @@
 // Build the header section
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 
 import '../constants/appconstants.dart';
 
@@ -46,19 +48,38 @@ class AppHeader extends StatelessWidget {
                 // ),
               ),
             ],
-          ),
-          Container(
-            height: 95,
-            padding: const EdgeInsets.all(15),
-            // padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(38),
-              border: Border.all(
-                color: AppConstants.kcolorBorderGrey,
-                width: 4,
+          ).animate().slideX(
+                curve: Curves.easeInOut,
+                // delay: 200.ms,
+                duration: 500.ms,
+                begin: -1,
+                end: 0,
+                // End at the normal position (in the screen)
               ),
-            ),
-            child: Icon(icon),
+          GestureDetector(
+            onTap: () {
+              Get.back();
+            },
+            child: Container(
+              height: 95,
+              padding: const EdgeInsets.all(15),
+              // padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(38),
+                border: Border.all(
+                  color: AppConstants.kcolorBorderGrey,
+                  width: 4,
+                ),
+              ),
+              child: Icon(icon),
+            ).animate().slideX(
+                  curve: Curves.easeInOut,
+                  // delay: 200.ms,
+                  duration: 500.ms,
+                  begin: 1,
+                  end: 0,
+                  // End at the normal position (in the screen)
+                ),
           ),
         ],
       ),

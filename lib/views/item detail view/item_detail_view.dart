@@ -1,14 +1,45 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 
 import '../../constants/appconstants.dart';
+import '../../contollers/cart_controller.dart';
 import '../../widgets/build_header.dart';
 import '../../widgets/shapes/hill_shape.dart';
+import '../cart list view/cart_list_view.dart';
 
-class ItemDetailView extends StatelessWidget {
-  const ItemDetailView({super.key});
+int _numberOfItems = 1;
 
+final CartController cartController = Get.put(CartController());
+
+class ItemDetailView extends StatefulWidget {
+  final String id;
+  final String name;
+  final String backgroundColor;
+  final String subtitle;
+  final String type;
+  final String imageUrl;
+  final double price;
+
+  const ItemDetailView({
+    super.key,
+    required this.id,
+    required this.name,
+    required this.backgroundColor,
+    required this.subtitle,
+    required this.type,
+    required this.imageUrl,
+    required this.price,
+  });
+
+  @override
+  State<ItemDetailView> createState() => _ItemDetailViewState();
+}
+
+class _ItemDetailViewState extends State<ItemDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,12 +64,12 @@ class ItemDetailView extends StatelessWidget {
                   padding: const EdgeInsets.all(0),
                   children: [
                     // appbar
-                    const AppHeader(
+                    AppHeader(
                       icon: Icons.arrow_back_ios_new_rounded,
                       textSpan: TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Coconut\n',
+                            text: '${widget.name}\n',
                             style: TextStyle(
                               fontSize: 42,
                               fontWeight: FontWeight.w400,
@@ -46,7 +77,7 @@ class ItemDetailView extends StatelessWidget {
                             ),
                           ),
                           TextSpan(
-                            text: 'Chips',
+                            text: widget.type,
                             style: TextStyle(
                               fontSize: 42,
                               fontWeight: FontWeight.w700,
@@ -62,7 +93,7 @@ class ItemDetailView extends StatelessWidget {
                       child: Row(
                         children: [
                           Text(
-                            'Dang',
+                            widget.subtitle,
                             style: TextStyle(
                               color: AppConstants.kTextColorPrimary
                                   .withOpacity(.4),
@@ -72,7 +103,11 @@ class ItemDetailView extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ),
+                    ).animate().fadeIn(
+                          curve: Curves.easeInOut,
+                          delay: 300.ms,
+                          duration: 800.ms,
+                        ),
                     // product image // display
                     Stack(
                       fit: StackFit.passthrough,
@@ -83,8 +118,8 @@ class ItemDetailView extends StatelessWidget {
                             height: 300,
                             // width: 500,
                             // color: Colors.red,
-                            child: const Image(
-                              image: AssetImage('assets/images/dang.png'),
+                            child: Image(
+                              image: AssetImage(widget.imageUrl),
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -132,9 +167,9 @@ class ItemDetailView extends StatelessWidget {
                               ),
                               Positioned(
                                 top: 45,
-                                left: 20,
+                                left: 11,
                                 child: Container(
-                                  width: 155 - 40,
+                                  width: 155 - 20,
                                   // color: Colors.yellow,
                                   child: Row(
                                     mainAxisAlignment:
@@ -147,7 +182,7 @@ class ItemDetailView extends StatelessWidget {
                                           Text(
                                             'Pure',
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 10,
                                               color: AppConstants
                                                   .kTextColorPrimary
                                                   .withOpacity(.4),
@@ -155,9 +190,9 @@ class ItemDetailView extends StatelessWidget {
                                             ),
                                           ),
                                           Text(
-                                            'Coconut',
+                                            widget.name,
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 10,
                                               color: AppConstants
                                                   .kTextColorPrimary
                                                   .withOpacity(.4),
@@ -169,7 +204,7 @@ class ItemDetailView extends StatelessWidget {
                                       const Text(
                                         '100%',
                                         style: TextStyle(
-                                          fontSize: 24,
+                                          fontSize: 23,
                                           color: AppConstants.kTextColorPrimary,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -180,7 +215,10 @@ class ItemDetailView extends StatelessWidget {
                               )
                             ],
                           ),
-                        ),
+                        ).animate().fadeIn(
+                              curve: Curves.easeInOut,
+                              duration: 800.ms,
+                            ),
                         // BackdropFilter(
                         //   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         //   child: Container(
@@ -194,7 +232,13 @@ class ItemDetailView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // +
-                        Container(
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _numberOfItems = _numberOfItems + 1;
+                              print(_numberOfItems);
+                            });
+                          },
                           // color: Colors.red,
                           child: const Stack(
                             children: [
@@ -212,18 +256,27 @@ class ItemDetailView extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
+                          ).animate().fadeIn(
+                                curve: Curves.easeInOut,
+                                delay: 300.ms,
+                                duration: 800.ms,
+                              ),
                         ),
                         // nam and cost
                         Column(
                           children: [
-                            const Text(
-                              '03',
+                            Text(
+                              _numberOfItems < 10
+                                  ? '0$_numberOfItems'
+                                  : '$_numberOfItems',
                               style: TextStyle(
                                   fontSize: 46,
                                   fontWeight: FontWeight.w700,
                                   color: AppConstants.kTextColorPrimary),
-                            ),
+                            ).animate().fadeIn(
+                                  curve: Curves.easeOut,
+                                  duration: 800.ms,
+                                ),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
@@ -232,18 +285,32 @@ class ItemDetailView extends StatelessWidget {
                                 color: AppConstants.kSecondaryColor2,
                                 borderRadius: BorderRadius.circular(44),
                               ),
-                              child: const Text(
-                                '\$ 06.00',
+                              child: Text(
+                                '\$ ${widget.price * _numberOfItems}',
                                 style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
                                     color: AppConstants.kTextColorPrimary),
                               ),
-                            ),
+                            ).animate().fadeIn(
+                                  curve: Curves.easeInOut,
+                                  delay: 300.ms,
+                                  duration: 800.ms,
+                                ),
                           ],
                         ),
                         // -
-                        Container(
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (_numberOfItems >= 0) {
+                                _numberOfItems = 0;
+                              } else {
+                                _numberOfItems = _numberOfItems - 1;
+                              }
+                              print(_numberOfItems);
+                            });
+                          },
                           // color: Colors.red,
                           child: Stack(
                             children: [
@@ -264,7 +331,11 @@ class ItemDetailView extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
+                          ).animate().fadeIn(
+                                curve: Curves.easeInOut,
+                                delay: 300.ms,
+                                duration: 800.ms,
+                              ),
                         ),
                       ],
                     )
@@ -292,24 +363,44 @@ class ItemDetailView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.all(4),
-                      width: 95,
-                      height: 70,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppConstants.kSecondaryColor2,
-                        borderRadius: BorderRadius.circular(53.35),
-                      ),
-                      child: const Icon(
-                        Icons.shopping_cart,
-                        color: AppConstants.kTextColorPrimary,
-                        size: 32,
+                    GestureDetector(
+                      onTap: () {
+                        // Add to cart logic here
+                        cartController.addToCart(
+                          id: widget.id,
+                          title: '${widget.name} x$_numberOfItems',
+                          subtitle: widget.subtitle,
+                          type: widget.type,
+                          price: widget.price * _numberOfItems,
+                          backgroundColor: widget.backgroundColor,
+                          image: widget.imageUrl,
+                        );
+
+                        Get.to(() => const CartListView());
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(4),
+                        width: 95,
+                        height: 70,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppConstants.kSecondaryColor2,
+                          borderRadius: BorderRadius.circular(53.35),
+                        ),
+                        child: const Icon(
+                          Icons.shopping_cart,
+                          color: AppConstants.kTextColorPrimary,
+                          size: 32,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
+              ).animate().fadeIn(
+                    curve: Curves.easeInOut,
+                    delay: 300.ms + 800.ms,
+                    duration: 800.ms,
+                  ),
             ],
           ),
         ),

@@ -22,6 +22,7 @@ class SnacksApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      
       initialBinding: InitControllers(),
       theme: ThemeData(
         fontFamily: 'SF Pro Display',
