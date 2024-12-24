@@ -13,6 +13,7 @@ import '../../contollers/cart_controller.dart';
 import '../../contollers/cart_view_collectons_controller.dart';
 import '../../widgets/bottom_cart_preview.dart';
 import '../../widgets/build_header.dart';
+import '../item detail view/item_detail_view.dart';
 import '../test screen/test_screen.dart';
 
 final CartController cartController = Get.put(CartController());
@@ -122,164 +123,179 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: 200,
-      width: MediaQuery.of(context).size.width / 2,
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          Positioned(
-            right: -20,
-            top: 40,
-            child: Transform.translate(
-              offset: const Offset(.5, -1),
-              child: Transform.rotate(
-                angle: 0.48, // Adjust this value for different tilt angles
-                child: Container(
-                  width: 125,
-                  height: 171,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () {
+        Get.to(
+          () => ItemDetailView(
+            name: title,
+            subtitle: subtitle,
+            type: type,
+            imageUrl: imagePath,
+            price: price,
+            id: id,
+            backgroundColor: colorString,
+          ),
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: 200,
+        width: MediaQuery.of(context).size.width / 2,
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Positioned(
+              right: -20,
+              top: 40,
+              child: Transform.translate(
+                offset: const Offset(.5, -1),
+                child: Transform.rotate(
+                  angle: 0.48, // Adjust this value for different tilt angles
+                  child: Container(
+                    width: 125,
+                    height: 171,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 83,
-                  ), // Set max width for wrapping
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow
-                        .ellipsis, // Optional: Adds ellipsis for overflow
-                    maxLines: 2, // Optional: Limits to 2 lines
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    type,
-                    style: TextStyle(
-                      color: AppConstants.kTextColorPrimary.withOpacity(.5),
-                      fontSize: 8,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                // Price and Cart Button Row
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(23),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 2,
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    constraints: const BoxConstraints(
+                      maxWidth: 83,
+                    ), // Set max width for wrapping
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      // color: Colors.red,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(23),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                      overflow: TextOverflow
+                          .ellipsis, // Optional: Adds ellipsis for overflow
+                      maxLines: 2, // Optional: Limits to 2 lines
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      type,
+                      style: TextStyle(
+                        color: AppConstants.kTextColorPrimary.withOpacity(.5),
+                        fontSize: 8,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Price and Cart Button Row
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(23),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 2,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Glass-like price container
-                          Row(
-                            children: [
-                              const SizedBox(
-                                width: 17,
-                              ),
-                              Text(
-                                '\$${price.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
+                        // color: Colors.red,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(23),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
                           ),
-                          // Glass-like cart button
-                          GestureDetector(
-                            onTap: () {
-                              // Add to cart logic here
-                              cartController.addToCart(
-                                id: id,
-                                title: title,
-                                subtitle: subtitle,
-                                type: type,
-                                price: price,
-                                backgroundColor: colorString,
-                                image: imagePath,
-                              );
-                              onClick;
-                              // homeController.removeSnackById(type, id);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.8),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Glass-like price container
+                            Row(
+                              children: [
+                                const SizedBox(
+                                  width: 17,
                                 ),
-                              ),
-                              child: const Icon(
-                                Icons.shopping_cart,
-                                color: Colors.white,
-                                size: 13,
+                                Text(
+                                  '\$${price.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Glass-like cart button
+                            GestureDetector(
+                              onTap: () {
+                                // Add to cart logic here
+                                cartController.addToCart(
+                                  id: id,
+                                  title: title,
+                                  subtitle: subtitle,
+                                  type: type,
+                                  price: price,
+                                  backgroundColor: colorString,
+                                  image: imagePath,
+                                );
+                                onClick;
+                                // homeController.removeSnackById(type, id);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.8),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.shopping_cart,
+                                  color: Colors.white,
+                                  size: 13,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Tilted Image
-        ],
+            // Tilted Image
+          ],
+        ),
       ),
     );
   }

@@ -28,6 +28,6 @@ class SnacksApp extends StatelessWidget {
         fontFamily: 'SF Pro Display',
       ),
       home: const CartCollections(),
-    );
+    ); 
   }
 }

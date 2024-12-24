@@ -41,6 +41,13 @@ class ItemDetailView extends StatefulWidget {
 
 class _ItemDetailViewState extends State<ItemDetailView> {
   @override
+  void initState() {
+    super.initState();
+    // Reset the number of items to 1 when the widget is created
+    _numberOfItems = 1;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -70,7 +77,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                         children: [
                           TextSpan(
                             text: '${widget.name}\n',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 42,
                               fontWeight: FontWeight.w400,
                               color: AppConstants.kTextColorPrimary,
@@ -78,7 +85,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                           ),
                           TextSpan(
                             text: widget.type,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 42,
                               fontWeight: FontWeight.w700,
                               color: AppConstants.kTextColorPrimary,
@@ -122,7 +129,10 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                               image: AssetImage(widget.imageUrl),
                               fit: BoxFit.contain,
                             ),
-                          ),
+                          ).animate().scale(
+                                curve: Curves.easeInOut,
+                                duration: 300.ms,
+                              ),
                         ),
                         // Translucent glass effect with skew
                         Positioned(
@@ -269,7 +279,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                               _numberOfItems < 10
                                   ? '0$_numberOfItems'
                                   : '$_numberOfItems',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 46,
                                   fontWeight: FontWeight.w700,
                                   color: AppConstants.kTextColorPrimary),
@@ -287,7 +297,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                               ),
                               child: Text(
                                 '\$ ${widget.price * _numberOfItems}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
                                     color: AppConstants.kTextColorPrimary),
