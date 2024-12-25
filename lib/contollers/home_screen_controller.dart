@@ -21,27 +21,6 @@ class HomeScreenController extends GetxController {
   dynamic get snacks => snacksData;
   dynamic get snacksDataAllList => _snacksDataAllList;
 
-  // Observable variable for Snacks data
-  // var snacks = Rx<Snacks?>(null);
-
-  // Method to increment _count
-  // void increment() {
-  //   _count++;
-  //   update(); // This will trigger GetBuilder to rebuild the widget
-  // }
-
-  // Method to load and parse the JSON data
-  // Future<void> loadSnacksData() async {
-  //   // Load the JSON file from assets
-  //   String jsonString = await rootBundle.loadString('assets/data/snacks.json');
-
-  //   // Decode the JSON string into a Map
-  //   Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-
-  //   // Convert the map into a Snacks object and update the observable variable
-  //   snacks.value = Snacks.fromJson(jsonMap);
-  // }
-
   void removeSnackById(String category, String id) {
     // Find the category list
     List<Snack>? snacksList = snacksData[category];
@@ -53,4 +32,22 @@ class HomeScreenController extends GetxController {
       update();
     }
   }
+
+  // void removeSnackById(String type, String id) {
+  //   if (type.toLowerCase() == 'all') {
+  //     final index = snacksDataAllList.indexWhere((item) => item.id == id);
+  //     if (index != -1) {
+  //       snacksDataAllList.removeAt(index);
+  //     }
+  //   } else {
+  //     final categorySnacks = snacksData[type.toLowerCase()];
+  //     if (categorySnacks != null) {
+  //       final index = categorySnacks.indexWhere((item) => item.id == id);
+  //       if (index != -1) {
+  //         categorySnacks.removeAt(index);
+  //       }
+  //     }
+  //   }
+  //   update();
+  // }
 }

@@ -97,7 +97,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final String id;
   final String title;
   final double price;
@@ -122,18 +122,79 @@ class ProductCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
+  bool _isRemoved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.8,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -0.5),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _animateAndRemove() async {
+    setState(() {
+      _isRemoved = true;
+    });
+
+    await _controller.forward();
+
+    // Remove from data source after animation
+    homeController.removeSnackById(widget.type, widget.id);
+  }
+
+  Widget _buildCard() {
     return GestureDetector(
       onTap: () {
         Get.to(
           () => ItemDetailView(
-            name: title,
-            subtitle: subtitle,
-            type: type,
-            imageUrl: imagePath,
-            price: price,
-            id: id,
-            backgroundColor: colorString,
+            name: widget.title,
+            subtitle: widget.subtitle,
+            type: widget.type,
+            imageUrl: widget.imagePath,
+            price: widget.price,
+            id: widget.id,
+            backgroundColor: widget.colorString,
           ),
         );
       },
@@ -143,7 +204,7 @@ class ProductCard extends StatelessWidget {
         width: MediaQuery.of(context).size.width / 2,
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color,
+          color: widget.color,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Stack(
@@ -155,7 +216,7 @@ class ProductCard extends StatelessWidget {
               child: Transform.translate(
                 offset: const Offset(.5, -1),
                 child: Transform.rotate(
-                  angle: 0.48, // Adjust this value for different tilt angles
+                  angle: 0.48,
                   child: Container(
                     width: 125,
                     height: 171,
@@ -170,14 +231,13 @@ class ProductCard extends StatelessWidget {
                       ],
                     ),
                     child: Image.asset(
-                      imagePath,
+                      widget.imagePath,
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
               ),
             ),
-            // Content
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -186,16 +246,15 @@ class ProductCard extends StatelessWidget {
                   Container(
                     constraints: const BoxConstraints(
                       maxWidth: 83,
-                    ), // Set max width for wrapping
+                    ),
                     child: Text(
-                      title,
+                      widget.title,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
-                      overflow: TextOverflow
-                          .ellipsis, // Optional: Adds ellipsis for overflow
-                      maxLines: 2, // Optional: Limits to 2 lines
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -209,7 +268,7 @@ class ProductCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      type,
+                      widget.type,
                       style: TextStyle(
                         color: AppConstants.kTextColorPrimary.withOpacity(.5),
                         fontSize: 8,
@@ -217,7 +276,6 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  // Price and Cart Button Row
                   ClipRRect(
                     borderRadius: BorderRadius.circular(23),
                     child: BackdropFilter(
@@ -227,7 +285,6 @@ class ProductCard extends StatelessWidget {
                           horizontal: 2,
                           vertical: 2,
                         ),
-                        // color: Colors.red,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(23),
@@ -238,14 +295,11 @@ class ProductCard extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Glass-like price container
                             Row(
                               children: [
-                                const SizedBox(
-                                  width: 17,
-                                ),
+                                const SizedBox(width: 17),
                                 Text(
-                                  '\$${price.toStringAsFixed(2)}',
+                                  '\$${widget.price.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w900,
@@ -253,21 +307,18 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            // Glass-like cart button
                             GestureDetector(
                               onTap: () {
-                                // Add to cart logic here
+                                _animateAndRemove();
                                 cartController.addToCart(
-                                  id: id,
-                                  title: title,
-                                  subtitle: subtitle,
-                                  type: type,
-                                  price: price,
-                                  backgroundColor: colorString,
-                                  image: imagePath,
+                                  id: widget.id,
+                                  title: widget.title,
+                                  subtitle: widget.subtitle,
+                                  type: widget.type,
+                                  price: widget.price,
+                                  backgroundColor: widget.colorString,
+                                  image: widget.imagePath,
                                 );
-                                onClick;
-                                // homeController.removeSnackById(type, id);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -293,96 +344,203 @@ class ProductCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Tilted Image
           ],
         ),
       ),
     );
   }
-}
-
-class AnimatedListWithDelete extends StatefulWidget {
-  final List<String> items;
-  final Function(String) onDelete;
-
-  const AnimatedListWithDelete(
-      {Key? key, required this.items, required this.onDelete})
-      : super(key: key);
-
-  @override
-  _AnimatedListWithDeleteState createState() => _AnimatedListWithDeleteState();
-}
-
-class _AnimatedListWithDeleteState extends State<AnimatedListWithDelete> {
-  late List<String> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = widget.items;
-  }
-
-  void _deleteItem(int index) {
-    final removedItem = _items[index];
-    setState(() {
-      _items.removeAt(index);
-    });
-
-    // Call the onDelete callback to perform additional operations if needed
-    widget.onDelete(removedItem);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: _items.length,
-      itemBuilder: (context, index) {
-        return AnimatedListItem(
-          item: _items[index],
-          onDelete: () => _deleteItem(index),
-        );
-      },
-    );
-  }
-}
-
-class AnimatedListItem extends StatefulWidget {
-  final String item;
-  final VoidCallback onDelete;
-
-  const AnimatedListItem({Key? key, required this.item, required this.onDelete})
-      : super(key: key);
-
-  @override
-  _AnimatedListItemState createState() => _AnimatedListItemState();
-}
-
-class _AnimatedListItemState extends State<AnimatedListItem> {
-  bool _isDeleted = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: _isDeleted ? 0.0 : 1.0,
-      duration: const Duration(milliseconds: 300),
-      child: ListTile(
-        title: Text(widget.item),
-        trailing: IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () {
-            setState(() {
-              _isDeleted = true;
-            });
-            // Call the delete operation after the animation
-            Future.delayed(const Duration(milliseconds: 300), widget.onDelete);
-          },
+    if (_isRemoved) {
+      return SizeTransition(
+        sizeFactor: Tween<double>(begin: 1, end: 0).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeInOut,
+          ),
         ),
-      ),
-    );
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: _buildCard(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _buildCard();
   }
 }
 
 // Usage Example
+// class _BuildProductGrid extends StatelessWidget {
+//   final dynamic productData;
+
+//   const _BuildProductGrid({
+//     required this.productData,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Ensure snacksData and currentCategory are not null
+//     // final snacks = collectorsController.snacksData[
+//     //         collectorsController.currentCategory.toString().toLowerCase()] ??
+//     //     [];
+
+//     dynamic snacks;
+//     if (collectorsController.currentCategory.toString().toLowerCase() ==
+//         'all') {
+//       snacks = (homeController.snacksDataAllList) ?? [];
+//     } else {
+//       snacks = collectorsController.snacksData[
+//               collectorsController.currentCategory.toString().toLowerCase()] ??
+//           [];
+//     }
+//     print(snacks);
+
+//     final List products = (collectorsController.snacksData[collectorsController
+//                 .currentCategory
+//                 .toString()
+//                 .toLowerCase()] ??
+//             [])
+//         .map((e) => print(e))
+//         .toList();
+
+//     print(products);
+
+//     return Row(
+//       children: [
+//         Expanded(
+//           child: ListView(
+//             padding: const EdgeInsets.all(8),
+//             children: [
+//               ...snacks.sublist(0, snacks.length ~/ 2).map((e) {
+//                 return ProductCard(
+//                   id: e.id,
+//                   colorString: e.backgroundColor,
+//                   subtitle: e.subtitle,
+//                   type: e.type,
+//                   title: e.title,
+//                   price: e.price,
+//                   color: AppConstants.hexToColor(e.backgroundColor),
+//                   imagePath: e.image,
+//                   onClick: () {},
+//                 );
+//               }),
+//             ],
+//           ),
+//         ).animate().slideY(
+//               curve: Curves.easeInOut,
+//               delay: 530.ms,
+//               duration: 500.ms,
+//               begin: 1, // Start from bottom (out of the screen)
+//               end: 0, // End at the normal position (in the screen)
+//             ),
+//         Expanded(
+//           child: Container(
+//             padding: const EdgeInsets.all(8),
+//             child: Column(
+//               children: [
+//                 Transform.translate(
+//                   offset: const Offset(0, -8),
+//                   child: Container(
+//                     margin: const EdgeInsets.all(8),
+//                     padding: const EdgeInsets.all(4),
+//                     decoration: BoxDecoration(
+//                       color: AppConstants.kcolorBorderGrey,
+//                       borderRadius: BorderRadius.circular(28.35),
+//                     ),
+//                     child: Row(
+//                       children: [
+//                         Expanded(
+//                           child: RichText(
+//                             textAlign: TextAlign.center,
+//                             text: TextSpan(
+//                               style: TextStyle(
+//                                 fontSize: 14,
+//                                 color: AppConstants.kTextColorPrimary,
+//                               ),
+//                               children: <TextSpan>[
+//                                 TextSpan(
+//                                   text: snacks.length.toString(),
+//                                   style: TextStyle(
+//                                     fontWeight: FontWeight.w700,
+//                                   ),
+//                                 ),
+//                                 TextSpan(
+//                                   text: ' Items',
+//                                   style: TextStyle(
+//                                     fontWeight: FontWeight.w400,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                         Container(
+//                           width: 50,
+//                           padding: const EdgeInsets.all(8),
+//                           decoration: BoxDecoration(
+//                             color: AppConstants.kBackgroundColor,
+//                             borderRadius: BorderRadius.circular(28.35),
+//                           ),
+//                           child: const Icon(Icons.tune),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ).animate().slideX(
+//                       curve: Curves.easeInOut,
+//                       // delay: 530.ms,
+//                       duration: 500.ms,
+//                       begin: 1,
+//                       end: 0,
+//                       // End at the normal position (in the screen)
+//                     ),
+//                 Expanded(
+//                   child: ListView(
+//                     shrinkWrap: true,
+//                     children: [
+//                       if (snacks.isEmpty)
+//                         Text(
+//                           'No snacks available in this category: ${collectorsController.currentCategory.toLowerCase()}',
+//                         ),
+//                       ...snacks.sublist(snacks.length ~/ 2).map((e) {
+//                         return ProductCard(
+//                           id: e.id,
+//                           colorString: e.backgroundColor,
+//                           subtitle: e.subtitle,
+//                           type: e.type,
+//                           title: e.title,
+//                           price: e.price,
+//                           color: AppConstants.hexToColor(e.backgroundColor),
+//                           imagePath: e.image,
+//                           onClick: () {},
+//                         );
+//                       }).toList(),
+//                     ],
+//                   ),
+//                 ).animate().slideY(
+//                       curve: Curves.easeInOut,
+//                       delay: 530.ms + 500.ms,
+//                       duration: 500.ms,
+//                       begin: 1, // Start from bottom (out of the screen)
+//                       end: 0, // End at the normal position (in the screen)
+//                     ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
 class _BuildProductGrid extends StatelessWidget {
   final dynamic productData;
 
@@ -392,11 +550,6 @@ class _BuildProductGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure snacksData and currentCategory are not null
-    // final snacks = collectorsController.snacksData[
-    //         collectorsController.currentCategory.toString().toLowerCase()] ??
-    //     [];
-
     dynamic snacks;
     if (collectorsController.currentCategory.toString().toLowerCase() ==
         'all') {
@@ -406,45 +559,37 @@ class _BuildProductGrid extends StatelessWidget {
               collectorsController.currentCategory.toString().toLowerCase()] ??
           [];
     }
-    print(snacks);
-
-    final List products = (collectorsController.snacksData[collectorsController
-                .currentCategory
-                .toString()
-                .toLowerCase()] ??
-            [])
-        .map((e) => print(e))
-        .toList();
-
-    print(products);
 
     return Row(
       children: [
         Expanded(
-          child: ListView(
+          child: AnimatedList(
             padding: const EdgeInsets.all(8),
-            children: [
-              ...snacks.sublist(0, snacks.length ~/ 2).map((e) {
-                return ProductCard(
-                  id: e.id,
-                  colorString: e.backgroundColor,
-                  subtitle: e.subtitle,
-                  type: e.type,
-                  title: e.title,
-                  price: e.price,
-                  color: AppConstants.hexToColor(e.backgroundColor),
-                  imagePath: e.image,
+            initialItemCount: snacks.sublist(0, snacks.length ~/ 2).length,
+            itemBuilder: (context, index, animation) {
+              final item = snacks.sublist(0, snacks.length ~/ 2)[index];
+              return SizeTransition(
+                sizeFactor: animation,
+                child: ProductCard(
+                  id: item.id,
+                  colorString: item.backgroundColor,
+                  subtitle: item.subtitle,
+                  type: item.type,
+                  title: item.title,
+                  price: item.price,
+                  color: AppConstants.hexToColor(item.backgroundColor),
+                  imagePath: item.image,
                   onClick: () {},
-                );
-              }),
-            ],
+                ),
+              );
+            },
           ),
         ).animate().slideY(
               curve: Curves.easeInOut,
               delay: 530.ms,
               duration: 500.ms,
-              begin: 1, // Start from bottom (out of the screen)
-              end: 0, // End at the normal position (in the screen)
+              begin: 1,
+              end: 0,
             ),
         Expanded(
           child: Container(
@@ -473,11 +618,11 @@ class _BuildProductGrid extends StatelessWidget {
                               children: <TextSpan>[
                                 TextSpan(
                                   text: snacks.length.toString(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: ' Items',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w400,
@@ -501,41 +646,38 @@ class _BuildProductGrid extends StatelessWidget {
                   ),
                 ).animate().slideX(
                       curve: Curves.easeInOut,
-                      // delay: 530.ms,
                       duration: 500.ms,
                       begin: 1,
                       end: 0,
-                      // End at the normal position (in the screen)
                     ),
                 Expanded(
-                  child: ListView(
+                  child: AnimatedList(
                     shrinkWrap: true,
-                    children: [
-                      if (snacks.isEmpty)
-                        Text(
-                          'No snacks available in this category: ${collectorsController.currentCategory.toLowerCase()}',
-                        ),
-                      ...snacks.sublist(snacks.length ~/ 2).map((e) {
-                        return ProductCard(
-                          id: e.id,
-                          colorString: e.backgroundColor,
-                          subtitle: e.subtitle,
-                          type: e.type,
-                          title: e.title,
-                          price: e.price,
-                          color: AppConstants.hexToColor(e.backgroundColor),
-                          imagePath: e.image,
+                    initialItemCount: snacks.sublist(snacks.length ~/ 2).length,
+                    itemBuilder: (context, index, animation) {
+                      final item = snacks.sublist(snacks.length ~/ 2)[index];
+                      return SizeTransition(
+                        sizeFactor: animation,
+                        child: ProductCard(
+                          id: item.id,
+                          colorString: item.backgroundColor,
+                          subtitle: item.subtitle,
+                          type: item.type,
+                          title: item.title,
+                          price: item.price,
+                          color: AppConstants.hexToColor(item.backgroundColor),
+                          imagePath: item.image,
                           onClick: () {},
-                        );
-                      }).toList(),
-                    ],
+                        ),
+                      );
+                    },
                   ),
                 ).animate().slideY(
                       curve: Curves.easeInOut,
                       delay: 530.ms + 500.ms,
                       duration: 500.ms,
-                      begin: 1, // Start from bottom (out of the screen)
-                      end: 0, // End at the normal position (in the screen)
+                      begin: 1,
+                      end: 0,
                     ),
               ],
             ),
@@ -544,50 +686,6 @@ class _BuildProductGrid extends StatelessWidget {
       ],
     );
   }
-}
-
-// Build the cart section
-Widget _buildCart() {
-  return Container(
-    margin: const EdgeInsets.all(20),
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-    decoration: BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(30),
-    ),
-    child: const Row(
-      children: [
-        CircleAvatar(
-          backgroundColor: Colors.amber,
-          child: Text(
-            '1',
-            style: TextStyle(color: Colors.black),
-          ),
-        ),
-        SizedBox(width: 12),
-        Text(
-          'Cart',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          ' • 1 Item',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 16,
-          ),
-        ),
-        Spacer(),
-        CircleAvatar(
-          backgroundColor: Colors.white,
-          radius: 15,
-        ),
-      ],
-    ),
-  );
 }
 
 // Custom clipper for the cart shape
@@ -635,110 +733,3 @@ class CartShapeClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-
-// class BottomCartSheet extends StatelessWidget {
-//   final int itemCount;
-//   final List<String> cartImages;
-
-//   const BottomCartSheet({
-//     super.key,
-//     required this.itemCount,
-//     required this.cartImages,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 80,
-//       child: ClipPath(
-//         clipper: CartShapeClipper(),
-//         child: Container(
-//           height: 80,
-//           margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-//           decoration: BoxDecoration(
-//             color: Colors.black,
-//             borderRadius: BorderRadius.circular(30),
-//           ),
-//           child: Row(
-//             children: [
-//               const SizedBox(width: 20),
-//               // Item count circle
-//               Container(
-//                 width: 32,
-//                 height: 32,
-//                 decoration: const BoxDecoration(
-//                   color: Color(0xFFFFE082),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: Center(
-//                   child: Text(
-//                     '$itemCount',
-//                     style: const TextStyle(
-//                       color: Colors.black,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(width: 12),
-//               // Cart text and item count
-//               Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   const Text(
-//                     'Cart',
-//                     style: TextStyle(
-//                       color: Colors.white,
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   Text(
-//                     '${cartImages.length} Item',
-//                     style: const TextStyle(
-//                       color: Colors.grey,
-//                       fontSize: 14,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               const Spacer(),
-//               // Cart item images
-//               SizedBox(
-//                 height: 40,
-//                 child: Stack(
-//                   children: [
-//                     for (var i = 0; i < cartImages.length; i++)
-//                       Positioned(
-//                         right: i * 25.0,
-//                         child: Container(
-//                           width: 40,
-//                           height: 40,
-//                           decoration: BoxDecoration(
-//                             shape: BoxShape.circle,
-//                             color: Colors.white,
-//                             border: Border.all(
-//                               color: Colors.white,
-//                               width: 2,
-//                             ),
-//                           ),
-//                           child: ClipOval(
-//                             child: Image.asset(
-//                               cartImages[i],
-//                               fit: BoxFit.cover,
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                   ],
-//                 ),
-//               ),
-//               const SizedBox(width: 20),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
