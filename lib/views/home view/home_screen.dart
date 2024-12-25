@@ -550,140 +550,144 @@ class _BuildProductGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dynamic snacks;
-    if (collectorsController.currentCategory.toString().toLowerCase() ==
-        'all') {
-      snacks = (homeController.snacksDataAllList) ?? [];
-    } else {
-      snacks = collectorsController.snacksData[
-              collectorsController.currentCategory.toString().toLowerCase()] ??
-          [];
-    }
+    return GetBuilder<HomeScreenController>(
+      builder: (controller) {
+        dynamic snacks;
+        if (collectorsController.currentCategory.toString().toLowerCase() ==
+            'all') {
+          snacks = controller.snacksDataAllList;
+        } else {
+          snacks = controller.snacksData[collectorsController.currentCategory
+                  .toString()
+                  .toLowerCase()] ??
+              [];
+        }
 
-    return Row(
-      children: [
-        Expanded(
-          child: AnimatedList(
-            padding: const EdgeInsets.all(8),
-            initialItemCount: snacks.sublist(0, snacks.length ~/ 2).length,
-            itemBuilder: (context, index, animation) {
-              final item = snacks.sublist(0, snacks.length ~/ 2)[index];
-              return SizeTransition(
-                sizeFactor: animation,
-                child: ProductCard(
-                  id: item.id,
-                  colorString: item.backgroundColor,
-                  subtitle: item.subtitle,
-                  type: item.type,
-                  title: item.title,
-                  price: item.price,
-                  color: AppConstants.hexToColor(item.backgroundColor),
-                  imagePath: item.image,
-                  onClick: () {},
+        // Calculate the midpoint safely
+        final int midpoint = (snacks.length / 2).ceil();
+        final firstHalf = snacks.sublist(0, midpoint);
+        final secondHalf = snacks.sublist(midpoint);
+
+        return Row(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: [
+                  ...firstHalf.map((e) {
+                    return ProductCard(
+                      id: e.id,
+                      colorString: e.backgroundColor,
+                      subtitle: e.subtitle,
+                      type: e.type,
+                      title: e.title,
+                      price: e.price,
+                      color: AppConstants.hexToColor(e.backgroundColor),
+                      imagePath: e.image,
+                      onClick: () {},
+                    );
+                  }),
+                ],
+              ),
+            ).animate().slideY(
+                  curve: Curves.easeInOut,
+                  delay: 530.ms,
+                  duration: 500.ms,
+                  begin: 1,
+                  end: 0,
                 ),
-              );
-            },
-          ),
-        ).animate().slideY(
-              curve: Curves.easeInOut,
-              delay: 530.ms,
-              duration: 500.ms,
-              begin: 1,
-              end: 0,
-            ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, -8),
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppConstants.kcolorBorderGrey,
-                      borderRadius: BorderRadius.circular(28.35),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppConstants.kTextColorPrimary,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: snacks.length.toString(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const TextSpan(
-                                  text: ' Items',
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, -8),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppConstants.kcolorBorderGrey,
+                          borderRadius: BorderRadius.circular(28.35),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    color: AppConstants.kTextColorPrimary,
                                   ),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                      text: snacks.length.toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: ' Items',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                            Container(
+                              width: 50,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppConstants.kBackgroundColor,
+                                borderRadius: BorderRadius.circular(28.35),
+                              ),
+                              child: const Icon(Icons.tune),
+                            ),
+                          ],
                         ),
-                        Container(
-                          width: 50,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppConstants.kBackgroundColor,
-                            borderRadius: BorderRadius.circular(28.35),
-                          ),
-                          child: const Icon(Icons.tune),
+                      ),
+                    ).animate().slideX(
+                          curve: Curves.easeInOut,
+                          duration: 500.ms,
+                          begin: 1,
+                          end: 0,
                         ),
-                      ],
-                    ),
-                  ),
-                ).animate().slideX(
-                      curve: Curves.easeInOut,
-                      duration: 500.ms,
-                      begin: 1,
-                      end: 0,
-                    ),
-                Expanded(
-                  child: AnimatedList(
-                    shrinkWrap: true,
-                    initialItemCount: snacks.sublist(snacks.length ~/ 2).length,
-                    itemBuilder: (context, index, animation) {
-                      final item = snacks.sublist(snacks.length ~/ 2)[index];
-                      return SizeTransition(
-                        sizeFactor: animation,
-                        child: ProductCard(
-                          id: item.id,
-                          colorString: item.backgroundColor,
-                          subtitle: item.subtitle,
-                          type: item.type,
-                          title: item.title,
-                          price: item.price,
-                          color: AppConstants.hexToColor(item.backgroundColor),
-                          imagePath: item.image,
-                          onClick: () {},
+                    Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          ...secondHalf.map((e) {
+                            return ProductCard(
+                              id: e.id,
+                              colorString: e.backgroundColor,
+                              subtitle: e.subtitle,
+                              type: e.type,
+                              title: e.title,
+                              price: e.price,
+                              color: AppConstants.hexToColor(e.backgroundColor),
+                              imagePath: e.image,
+                              onClick: () {},
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ).animate().slideY(
+                          curve: Curves.easeInOut,
+                          delay: 530.ms + 500.ms,
+                          duration: 500.ms,
+                          begin: 1,
+                          end: 0,
                         ),
-                      );
-                    },
-                  ),
-                ).animate().slideY(
-                      curve: Curves.easeInOut,
-                      delay: 530.ms + 500.ms,
-                      duration: 500.ms,
-                      begin: 1,
-                      end: 0,
-                    ),
-              ],
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
